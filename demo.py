@@ -1,46 +1,25 @@
-import cv2
-import numpy as np
-from faster_rcnn import network
-from faster_rcnn.faster_rcnn import FasterRCNN
-from faster_rcnn.utils.timer import Timer
+import torch.nn as nn
+import torch
+from roi_pooling.modules.roi_pool import RoIPool
 
+class RoINet(nn.Module):
+    def __init__(self):
+        # TODO: Finished this part.
+        super(RoINet, self).__init__()
+        self.roi_pool = RoIPool(4,7,1.0/16)
 
-def test():
-    import os
-    im_file = 'demo/004545.jpg'
-    # im_file = 'data/VOCdevkit2007/VOC2007/JPEGImages/009036.jpg'
-    # im_file = '/media/longc/Data/data/2DMOT2015/test/ETH-Crossing/img1/000100.jpg'
-    image = cv2.imread(im_file)
-
-    model_file = '/media/longc/Data/models/VGGnet_fast_rcnn_iter_70000.h5'
-    # model_file = '/media/longc/Data/models/faster_rcnn_pytorch3/faster_rcnn_100000.h5'
-    # model_file = '/media/longc/Data/models/faster_rcnn_pytorch2/faster_rcnn_2000.h5'
-    detector = FasterRCNN()
-    network.load_net(model_file, detector)
-    detector.cuda()
-    detector.eval()
-    print('load model successfully!')
-
-    # network.save_net(r'/media/longc/Data/models/VGGnet_fast_rcnn_iter_70000.h5', detector)
-    # print('save model succ')
-
-    t = Timer()
-    t.tic()
-    # image = np.zeros(shape=[600, 800, 3], dtype=np.uint8) + 255
-    dets, scores, classes = detector.detect(image, 0.7)
-    runtime = t.toc()
-    print('total spend: {}s'.format(runtime))
-
-    im2show = np.copy(image)
-    for i, det in enumerate(dets):
-        det = tuple(int(x) for x in det)
-        cv2.rectangle(im2show, det[0:2], det[2:4], (255, 205, 51), 2)
-        cv2.putText(im2show, '%s: %.3f' % (classes[i], scores[i]), (det[0], det[1] + 15), cv2.FONT_HERSHEY_PLAIN,
-                    1.0, (0, 0, 255), thickness=1)
-    cv2.imwrite(os.path.join('demo', 'out.jpg'), im2show)
-    cv2.imshow('demo', im2show)
-    cv2.waitKey(0)
-
+    def forward(self,feature,rois):        
+        pooled_features = self.roi_pool(feature,rois)
+        return pooled_features
 
 if __name__ == '__main__':
-    test()
+
+    databuffer = torch.zeros([2, 16 * 4, 64, 64])
+    print('buffer size:',databuffer.size())
+    # param rois: (1, N, 4) N refers to bbox num, 4 represent (ltx, lty, w, h)
+    rois = torch.autograd.Variable(torch.FloatTensor([[0,1,2,7,8],[0,3,3,8,8]]),requires_grad=False)
+    roinet = RefineNet()
+    print('roi_data_shape:',rois.size())
+    out = roinet(databuffer, rois)
+    print('roi done.')
+    print('roi feature size:',out.size())

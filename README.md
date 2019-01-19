@@ -7,7 +7,7 @@ First clone this repo on local computer.
 `git clone https://github.com/longcw/faster_rcnn_pytorch`
 
 # Make 
-Execute 'make.sh'.
+Execute `make.sh`.
 
 # Demo
 Example code is included in `demo.py`.

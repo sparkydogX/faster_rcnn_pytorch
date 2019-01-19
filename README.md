@@ -2,7 +2,7 @@ Forked From https://github.com/longcw/faster_rcnn_pytorch
 **Delete almost everything form original repo except roi pooling.**
 Now this is a pure roi-pooling repo.
 
-# Get Start
+# Getting Start
 First clone this repo on local computer.
 `git clone https://github.com/longcw/faster_rcnn_pytorch`
 
